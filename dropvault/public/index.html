@@ -496,6 +496,10 @@ function setMode(m) {
   $('btnRecvMode').classList.toggle('active', m==='recv');
   $('panelSend').classList.toggle('active', m==='send');
   $('panelRecv').classList.toggle('active', m==='recv');
+  // Create a room if switching to send and don't have one yet
+  if (m === 'send' && !myCode && wsConnected) {
+    ws.send(JSON.stringify({ type: 'create' }));
+  }
 }
 
 // ── WebSocket connection ─────────────────────────────────────
@@ -508,8 +512,10 @@ function connectWS() {
     wsConnected = true;
     $('connChip').textContent = 'Connected';
     $('connChip').classList.add('live');
-    // Auto-create a room (sender mode default)
-    ws.send(JSON.stringify({ type: 'create' }));
+    // Only create a room if we are in send mode
+    if (mode === 'send') {
+      ws.send(JSON.stringify({ type: 'create' }));
+    }
   };
 
   ws.onclose = () => {
